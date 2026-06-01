@@ -1,5 +1,3 @@
-# .github/workflows/ci.yml
-# Runs on every push and pull request to main
 # Checks: TypeScript types, ESLint, and Next.js build
 
 name: Continuous Integration Build Pipeline
