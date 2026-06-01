@@ -1,0 +1,46 @@
+# .github/workflows/ci.yml
+# Runs on every push and pull request to main
+# Checks: TypeScript types, ESLint, and Next.js build
+
+name: Continuous Integration Build Pipeline
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    name: Type check, Lint & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Creates a dummy .env so Next.js build doesn't fail on missing vars.
+      # Real secrets are never stored here — Vercel holds the actual values.
+      - name: Create dummy .env for build
+        run: |
+          echo "NEXT_PUBLIC_SUPABASE_URL=https://placeholder.supabase.co" >> .env.local
+          echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=placeholder_key" >> .env.local
+          echo "GEMINI_API_KEY=placeholder_key" >> .env.local
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
